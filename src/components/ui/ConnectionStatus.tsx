@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { WifiIcon, WifiOffIcon, LoaderIcon } from 'lucide-react';
 
+// Interface for connection status component props
 interface ConnectionStatusProps {
   status: 'disconnected' | 'connecting' | 'connected' | 'in-session' | 'error';
   serverConnected: boolean;
@@ -9,12 +10,14 @@ interface ConnectionStatusProps {
   className?: string;
 }
 
-export function ConnectionStatus({ 
-  status, 
-  serverConnected, 
-  connectionState, 
-  className 
+// Component to display connection status
+export function ConnectionStatus({
+  status,
+  serverConnected,
+  connectionState,
+  className
 }: ConnectionStatusProps) {
+  // Get color based on status
   const getStatusColor = () => {
     if (!serverConnected) return 'text-red-500';
     
@@ -31,23 +34,25 @@ export function ConnectionStatus({
     }
   };
 
+  // Get text based on status
   const getStatusText = () => {
-    if (!serverConnected) return 'Serveur déconnecté';
+    if (!serverConnected) return 'Server disconnected';
     
     switch (status) {
       case 'connecting':
-        return 'Connexion...';
+        return 'Connecting...';
       case 'connected':
-        return 'Connecté';
+        return 'Connected';
       case 'in-session':
-        return connectionState === 'connected' ? 'Session active' : 'En session';
+        return connectionState === 'connected' ? 'Active session' : 'In session';
       case 'error':
-        return 'Erreur';
+        return 'Error';
       default:
-        return 'Déconnecté';
+        return 'Disconnected';
     }
   };
 
+  // Get icon based on status
   const getIcon = () => {
     if (!serverConnected || status === 'error') {
       return <WifiOffIcon className="h-4 w-4" />;
@@ -60,6 +65,7 @@ export function ConnectionStatus({
     return <WifiIcon className="h-4 w-4" />;
   };
 
+  // Component rendering
   return (
     <div className={cn(
       'flex items-center gap-2 px-3 py-1 rounded-lg text-sm font-medium transition-colors',

@@ -1,12 +1,12 @@
-// Jema Remote Desktop - Page Hôte
-// Cette page gère la création et le partage de sessions par l'hôte
-// Fonctionnalités:
-// - Création de sessions avec génération de codes
-// - Démarrage et arrêt du partage d'écran
-// - Affichage du code de session avec QR code
-// - Gestion des états de connexion et de partage
-// - Interface intuitive pour l'hôte
-// Auteur: Jema Technology
+// Jema Remote Desktop - Host Page
+// This page manages session creation and sharing by the host
+// Features:
+// - Session creation with code generation
+// - Starting and stopping screen sharing
+// - Session code display with QR code
+// - Connection and sharing state management
+// - Intuitive interface for the host
+// Author: Jema Technology
 // Date: 2025
 // GitHub: https://github.com/JemaOS/RemoteDesktop
 

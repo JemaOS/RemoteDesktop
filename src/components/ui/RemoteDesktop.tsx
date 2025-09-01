@@ -1,4 +1,4 @@
-// Jema Remote Desktop - Remote Desktop Component
+// Jema Remote Desktop - Remote desktop component
 // This component manages remote desktop display and control
 // Features:
 // - Remote screen video stream display

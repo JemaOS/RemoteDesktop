@@ -1,11 +1,11 @@
-// Jema Remote Desktop - Page d'Accueil
-// Cette page gère l'interface principale de l'application
-// Fonctionnalités:
-// - Navigation vers l'hébergement ou la connexion à une session
-// - Validation des codes de session en temps réel
-// - Affichage du statut de connexion au serveur
-// - Design minimaliste inspiré de Jema Technology
-// Auteur: Jema Technology
+// Jema Remote Desktop - Home Page
+// This page manages the main application interface
+// Features:
+// - Navigation to hosting or joining a session
+// - Real-time session code validation
+// - Server connection status display
+// - Minimalist design inspired by Jema Technology
+// Author: Jema Technology
 // Date: 2025
 // GitHub: https://github.com/JemaOS/RemoteDesktop
 

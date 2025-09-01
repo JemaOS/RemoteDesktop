@@ -1,12 +1,12 @@
-// Jema Remote Desktop - Page de Connexion Client
-// Cette page gère la connexion à une session existante en tant que client
-// Fonctionnalités:
-// - Validation du code de session
-// - Connexion à la session de l'hôte
-// - Affichage du bureau distant avec contrôle à distance
-// - Gestion des états de connexion et de contrôle
-// - Interface intuitive pour le client
-// Auteur: Jema Technology
+// Jema Remote Desktop - Client Join Page
+// This page manages connection to an existing session as a client
+// Features:
+// - Session code validation
+// - Connection to the host session
+// - Remote desktop display with remote control
+// - Connection and control state management
+// - Intuitive interface for the client
+// Author: Jema Technology
 // Date: 2025
 // GitHub: https://github.com/JemaOS/RemoteDesktop
 

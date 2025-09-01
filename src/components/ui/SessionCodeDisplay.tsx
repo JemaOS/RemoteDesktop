@@ -1,4 +1,4 @@
-// Jema Remote Desktop - Session Code Display Component
+// Jema Remote Desktop - Session code display component
 // This component manages session code display and sharing
 // Features:
 // - Session code display with formatting
