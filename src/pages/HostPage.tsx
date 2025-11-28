@@ -1,93 +1,80 @@
 // Jema Remote Desktop - Host Page
-// This page manages session creation and sharing by the host
-// Features:
-// - Session creation with code generation
-// - Starting and stopping screen sharing
-// - Session code display with QR code
-// - Connection and sharing state management
-// - Intuitive interface for the host
+// Design 2025 - Épuré, Élégant, Minimaliste
+// Primary Color: #5b64e9
+// Responsive: 4" to 50"+ screens, foldables support
 // Author: Jema Technology
 // Date: 2025
-// GitHub: https://github.com/JemaOS/RemoteDesktop
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
 import {
-  ArrowLeftIcon,
-  ShareIcon,
-  MonitorIcon,
-  UsersIcon,
-  AlertCircleIcon,
-  CheckCircleIcon,
-  PlayIcon,
-  SquareIcon
+  ArrowLeft,
+  Monitor,
+  Users,
+  Copy,
+  Share2,
+  Play,
+  Square,
+  Loader2,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
-import { useSession } from '@/contexts/SessionContext';
-import { SessionCodeDisplay } from '@/components/ui/SessionCodeDisplay';
-import { ConnectionStatus } from '@/components/ui/ConnectionStatus';
-import { RemoteDesktop } from '@/components/ui/RemoteDesktop';
-import { webrtcService } from '@/services/webrtc';
+import { usePeerSession } from '@/contexts/PeerSessionContext';
+import { toast } from 'sonner';
 
 export function HostPage() {
   const navigate = useNavigate();
-  const { state, createSession, startScreenShare, stopScreenShare, disconnect, clearError } = useSession();
-  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-  const [step, setStep] = useState<'create' | 'waiting' | 'connected' | 'sharing'>('create');
+  const {
+    state,
+    initialize,
+    createSession,
+    startScreenShare,
+    stopScreenShare,
+    disconnect,
+    clearError
+  } = usePeerSession();
+  
+  const [isCreating, setIsCreating] = useState(false);
+  const [copied, setCopied] = useState<'code' | 'link' | null>(null);
 
+  // Initialiser et créer la session au chargement
   useEffect(() => {
-    // Configuration des callbacks WebRTC
-    webrtcService.onRemoteStream((stream) => {
-      setRemoteStream(stream);
-    });
-
-    webrtcService.onConnectionStateChange((connectionState) => {
-      if (connectionState === 'connected') {
-        setStep('connected');
-      } else if (connectionState === 'disconnected' || connectionState === 'failed') {
-        setStep('waiting');
-        setRemoteStream(null);
+    const initAndCreate = async () => {
+      try {
+        setIsCreating(true);
+        
+        if (!state.peerId) {
+          await initialize();
+        }
+        
+        if (!state.sessionCode) {
+          await createSession();
+        }
+      } catch (error) {
+        console.error('Erreur initialisation:', error);
+      } finally {
+        setIsCreating(false);
       }
-    });
-
-    return () => {
-      // Cleanup
     };
+
+    initAndCreate();
   }, []);
-
-  useEffect(() => {
-    // Mise à jour de l'étape selon l'état de la session
-    if (state.sessionCode && !state.targetPeerId) {
-      setStep('waiting');
-    } else if (state.targetPeerId && state.connectionState === 'connected') {
-      setStep('connected');
-    }
-  }, [state.sessionCode, state.targetPeerId, state.connectionState]);
-
-  const handleCreateSession = async () => {
-    try {
-      await createSession();
-      setStep('waiting');
-    } catch (error) {
-      console.error('Error creating session:', error);
-    }
-  };
 
   const handleStartSharing = async () => {
     try {
       await startScreenShare();
-      setStep('sharing');
+      toast.success('Partage d\'écran démarré');
     } catch (error) {
-      console.error('Error starting share:', error);
+      console.error('Erreur partage:', error);
+      toast.error('Impossible de démarrer le partage');
     }
   };
 
   const handleStopSharing = () => {
     stopScreenShare();
-    setStep('connected');
+    toast.info('Partage arrêté');
   };
 
   const handleDisconnect = () => {
@@ -95,206 +82,299 @@ export function HostPage() {
     navigate('/');
   };
 
-  const handleBack = () => {
-    navigate('/');
+  const handleCopyCode = async () => {
+    if (state.sessionCode) {
+      await navigator.clipboard.writeText(state.sessionCode);
+      setCopied('code');
+      toast.success('Code copié');
+      setTimeout(() => setCopied(null), 2000);
+    }
   };
 
+  const handleCopyLink = async () => {
+    if (state.sessionCode) {
+      const link = `${window.location.origin}/join/${state.sessionCode}`;
+      await navigator.clipboard.writeText(link);
+      setCopied('link');
+      toast.success('Lien copié');
+      setTimeout(() => setCopied(null), 2000);
+    }
+  };
+
+  // Déterminer l'étape actuelle
+  const getStep = () => {
+    if (isCreating || !state.sessionCode) return 'creating';
+    if (state.status === 'sharing' || state.isScreenSharing) return 'sharing';
+    if (state.remotePeerId || state.status === 'connected') return 'connected';
+    return 'waiting';
+  };
+
+  const step = getStep();
+
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen min-h-[100dvh] bg-background">
+      {/* Gradient Background */}
+      <div className="fixed inset-0 bg-gradient-radial pointer-events-none" />
+      
       {/* Header */}
-      <header className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-50 glass-strong border-b border-border/50">
+        <div className="container-fluid">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            {/* Back & Title */}
+            <div className="flex items-center gap-2 sm:gap-3">
               <Button
-                variant="outline"
-                onClick={handleBack}
-                style={{ borderColor: '#5b64e9' }}
-                className="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/')}
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl"
               >
-                <ArrowLeftIcon className="h-4 w-4" />
+                <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
               </Button>
               
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#5b64e9' }}>
-                  <MonitorIcon className="h-5 w-5 text-white" />
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-8 h-8 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: '#5b64e9' }}
+                >
+                  <Monitor className="w-4 h-4 text-white" />
                 </div>
-                <div>
-                  <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <div className="hidden xs:block">
+                  <h1 className="text-sm sm:text-base font-semibold text-foreground">
                     Session Hôte
                   </h1>
+                  {state.sessionCode && (
+                    <p className="text-xs text-muted-foreground font-mono">
+                      {state.sessionCode}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <ConnectionStatus 
-                status={state.status}
-                serverConnected={state.serverConnected}
-                connectionState={state.connectionState}
-              />
-              
-              {step !== 'create' && (
-                <Button
-                  onClick={handleDisconnect}
-                  variant="outline"
-                  style={{ borderColor: '#5b64e9' }}
-                  className="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                >
-                  Terminer
-                </Button>
+            {/* Status & Actions */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {step === 'sharing' && (
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-error/10">
+                  <div className="w-2 h-2 rounded-full bg-error status-dot-live" />
+                  <span className="text-xs font-medium text-error hidden sm:inline">En direct</span>
+                </div>
               )}
+              {step === 'connected' && (
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ backgroundColor: 'rgba(91, 100, 233, 0.1)' }}>
+                  <Users className="w-3 h-3" style={{ color: '#5b64e9' }} />
+                  <span className="text-xs font-medium hidden sm:inline" style={{ color: '#5b64e9' }}>Connecté</span>
+                </div>
+              )}
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDisconnect}
+                className="rounded-xl text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
+              >
+                Terminer
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        {/* Étape 1: Créer une session */}
-        {step === 'create' && (
-          <div className="max-w-md mx-auto">
-            <Card className="border border-gray-200 dark:border-gray-800">
-              <CardHeader className="text-center">
-                <div className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#5b64e9' }}>
-                  <MonitorIcon className="h-8 w-8 text-white" />
-                </div>
-                <CardTitle className="text-xl">Démarrer le Partage</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-gray-600 dark:text-gray-400 text-center">
-                  Partagez votre écran en toute sécurité
+      <main className="container-fluid py-6 sm:py-8 lg:py-12">
+        {/* Error Alert */}
+        {state.error && (
+          <div className="mb-6 p-4 rounded-xl bg-error/10 border border-error/20 animate-fade-in">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-error flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm text-error">{state.error}</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearError}
+                className="h-6 px-2 text-xs text-error hover:bg-error/10"
+              >
+                Fermer
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Creating State */}
+        {step === 'creating' && (
+          <div className="max-w-md mx-auto animate-in">
+            <Card className="card-elevated">
+              <CardContent className="p-6 sm:p-8 text-center">
+                <Loader2 
+                  className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 animate-spin"
+                  style={{ color: '#5b64e9' }}
+                />
+                <h2 className="text-title text-foreground mb-2">
+                  Création de la session...
+                </h2>
+                <p className="text-caption">
+                  Connexion au réseau peer-to-peer
                 </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Waiting State */}
+        {step === 'waiting' && state.sessionCode && (
+          <div className="max-w-md mx-auto animate-in px-1">
+            <Card className="card-elevated">
+              <CardContent className="p-4 xs:p-5 sm:p-6">
+                {/* Icon - Plus petit sur très petits écrans */}
+                <div className="text-center mb-4 xs:mb-5">
+                  <div
+                    className="w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 rounded-xl xs:rounded-2xl flex items-center justify-center mx-auto mb-3"
+                    style={{ backgroundColor: 'rgba(91, 100, 233, 0.1)' }}
+                  >
+                    <Users className="w-6 h-6 xs:w-7 xs:h-7 sm:w-8 sm:h-8" style={{ color: '#5b64e9' }} />
+                  </div>
+                  <h2 className="text-base xs:text-lg sm:text-xl font-semibold text-foreground mb-0.5">
+                    En attente
+                  </h2>
+                  <p className="text-xs xs:text-sm text-muted-foreground">
+                    Partagez ce code
+                  </p>
+                </div>
                 
-                <Button 
-                  onClick={handleCreateSession}
-                  className="w-full"
-                  style={{ backgroundColor: '#5b64e9', borderColor: '#5b64e9' }}
+                {/* Session Code - Optimisé pour petits écrans */}
+                <div className="bg-muted/50 rounded-xl xs:rounded-2xl p-4 xs:p-5 mb-4 xs:mb-5 text-center">
+                  <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 uppercase tracking-wider">
+                    Code
+                  </p>
+                  <p className="text-2xl xs:text-3xl sm:text-4xl font-mono font-bold tracking-[0.15em] xs:tracking-[0.2em] text-foreground">
+                    {state.sessionCode}
+                  </p>
+                </div>
+                
+                {/* Copy Buttons - Plus compacts */}
+                <div className="grid grid-cols-2 gap-2 xs:gap-3 mb-4 xs:mb-5">
+                  <Button
+                    variant="outline"
+                    onClick={handleCopyCode}
+                    className="rounded-lg xs:rounded-xl h-10 xs:h-11 text-xs xs:text-sm"
+                  >
+                    {copied === 'code' ? (
+                      <CheckCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5 text-success" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5" />
+                    )}
+                    Code
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleCopyLink}
+                    className="rounded-lg xs:rounded-xl h-10 xs:h-11 text-xs xs:text-sm"
+                  >
+                    {copied === 'link' ? (
+                      <CheckCircle className="w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5 text-success" />
+                    ) : (
+                      <Share2 className="w-3.5 h-3.5 xs:w-4 xs:h-4 mr-1.5" />
+                    )}
+                    Lien
+                  </Button>
+                </div>
+                
+                {/* Start Sharing Button */}
+                <Button
+                  onClick={handleStartSharing}
+                  className="w-full rounded-lg xs:rounded-xl h-11 xs:h-12 sm:h-13 text-sm xs:text-base font-medium"
+                  style={{ backgroundColor: '#5b64e9' }}
                 >
-                  Créer une Session
+                  <Play className="w-4 h-4 xs:w-5 xs:h-5 mr-1.5 xs:mr-2" />
+                  Démarrer
                 </Button>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* Étape 2: En attente */}
-        {step === 'waiting' && (
-          <div className="max-w-md mx-auto">
-            <Card className="border border-gray-200 dark:border-gray-800">
-              <CardHeader className="text-center">
-                <div className="w-16 h-16 rounded-lg flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#5b64e9' }}>
-                  <UsersIcon className="h-8 w-8 text-white" />
+        {/* Connected State */}
+        {step === 'connected' && (
+          <div className="max-w-md mx-auto animate-in">
+            <Card className="card-elevated">
+              <CardContent className="p-6 sm:p-8">
+                {/* Success Icon */}
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-success/10">
+                    <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-success" />
+                  </div>
+                  <h2 className="text-title text-foreground mb-1">
+                    Client connecté
+                  </h2>
+                  <p className="text-caption">
+                    Un utilisateur a rejoint votre session
+                  </p>
                 </div>
-                <CardTitle className="text-xl">En attente de connexion</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <p className="text-gray-600 dark:text-gray-400 text-center">
-                  Partagez ce code avec la personne qui doit se connecter
-                </p>
                 
-                {state.sessionCode && state.expiresAt && (
-                  <SessionCodeDisplay
-                    sessionCode={state.sessionCode}
-                    expiresAt={state.expiresAt}
-                  />
-                )}
-                
-                <div className="space-y-3">
-                  <Button 
-                    onClick={handleStartSharing}
-                    className="w-full"
-                    style={{ backgroundColor: '#5b64e9', borderColor: '#5b64e9' }}
-                  >
-                    <PlayIcon className="h-4 w-4 mr-2" />
-                    Démarrer le Partage
-                  </Button>
-                  
-                  <Button
-                    onClick={handleDisconnect}
-                    variant="outline"
-                    style={{ borderColor: '#5b64e9' }}
-                    className="w-full text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    Annuler
-                  </Button>
-                </div>
+                {/* Start Sharing Button */}
+                <Button 
+                  onClick={handleStartSharing}
+                  className="w-full rounded-xl h-12 sm:h-14 text-base font-medium"
+                  style={{ backgroundColor: '#5b64e9' }}
+                >
+                  <Play className="w-5 h-5 mr-2" />
+                  Démarrer le partage
+                </Button>
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* Étape 3: Connecté */}
-        {step === 'connected' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                  Connecté
-                </Badge>
-                <span className="text-gray-600 dark:text-gray-400">
-                  Utilisateur distant connecté
-                </span>
-              </div>
-              
-              <Button 
-                onClick={handleStartSharing}
-                style={{ backgroundColor: '#5b64e9', borderColor: '#5b64e9' }}
-              >
-                <ShareIcon className="h-4 w-4 mr-2" />
-                Démarrer le Partage
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Étape 4: Partage en cours */}
+        {/* Sharing State */}
         {step === 'sharing' && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                  Partage en cours
-                </Badge>
-                <span className="text-gray-600 dark:text-gray-400">
-                  Partage d'écran actif
-                </span>
-              </div>
-              
-              <Button
-                onClick={handleStopSharing}
-                variant="outline"
-                style={{ borderColor: '#5b64e9' }}
-                className="text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
-              >
-                <SquareIcon className="h-4 w-4 mr-2" />
-                Arrêter le Partage
-              </Button>
-            </div>
-            
-            <Alert>
-              <AlertCircleIcon className="h-4 w-4" />
-              <AlertDescription>
-                Votre écran est maintenant visible par l'utilisateur connecté. Cliquez sur "Arrêter le Partage" lorsque vous avez terminé.
-              </AlertDescription>
-            </Alert>
+          <div className="max-w-2xl mx-auto animate-in">
+            <Card className="card-elevated">
+              <CardContent className="p-6 sm:p-8">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-error status-dot-live" />
+                    <h2 className="text-title text-foreground">
+                      Partage en cours
+                    </h2>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleStopSharing}
+                    className="rounded-xl border-error/30 text-error hover:bg-error/10"
+                  >
+                    <Square className="w-4 h-4 mr-2" />
+                    Arrêter
+                  </Button>
+                </div>
+                
+                {/* Info */}
+                <div 
+                  className="p-4 rounded-xl mb-6"
+                  style={{ backgroundColor: 'rgba(91, 100, 233, 0.05)' }}
+                >
+                  <div className="flex items-start gap-3">
+                    <Monitor className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#5b64e9' }} />
+                    <p className="text-sm" style={{ color: '#5b64e9' }}>
+                      Votre écran est visible par l'utilisateur connecté. 
+                      Cliquez sur "Arrêter" pour terminer le partage.
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Visual Indicator */}
+                <div className="bg-muted/30 rounded-2xl p-8 sm:p-12 text-center">
+                  <Monitor className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 text-muted-foreground/50" />
+                  <p className="text-muted-foreground">
+                    Écran partagé en temps réel
+                  </p>
+                  <p className="text-xs text-muted-foreground/70 mt-2 font-mono">
+                    Session: {state.sessionCode}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        )}
-
-        {/* Bureau distant */}
-        {(step === 'connected' || step === 'sharing') && remoteStream && (
-          <Card className="border border-gray-200 dark:border-gray-800 mt-8">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Bureau à Distance
-              </h3>
-              <RemoteDesktop
-                stream={remoteStream}
-                isControlling={false}
-                onDisconnect={handleDisconnect}
-                className="w-full h-[70vh] min-h-[500px]"
-              />
-            </CardContent>
-          </Card>
         )}
       </main>
     </div>

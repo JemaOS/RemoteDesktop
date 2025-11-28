@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { webrtcService, RemoteInputEvent } from '../services/webrtc';
+import { peerService, RemoteInputEvent } from '../services/peerService';
 
 // Hook to manage remote input (mouse, keyboard, scroll)
 export function useRemoteInput(isControlling: boolean = false) {
@@ -11,7 +11,7 @@ export function useRemoteInput(isControlling: boolean = false) {
       type: 'mouse-move',
       payload: { x, y }
     };
-    webrtcService.sendRemoteInput(input);
+    peerService.sendRemoteInput(input);
   }, [isControlling]);
 
   // Send mouse click
@@ -22,7 +22,7 @@ export function useRemoteInput(isControlling: boolean = false) {
       type: 'mouse-click',
       payload: { x, y, button }
     };
-    webrtcService.sendRemoteInput(input);
+    peerService.sendRemoteInput(input);
   }, [isControlling]);
 
   // Send key press
@@ -42,7 +42,7 @@ export function useRemoteInput(isControlling: boolean = false) {
         ...modifiers
       }
     };
-    webrtcService.sendRemoteInput(input);
+    peerService.sendRemoteInput(input);
   }, [isControlling]);
 
   // Send key release
@@ -53,7 +53,7 @@ export function useRemoteInput(isControlling: boolean = false) {
       type: 'key-release',
       payload: { key, code }
     };
-    webrtcService.sendRemoteInput(input);
+    peerService.sendRemoteInput(input);
   }, [isControlling]);
 
   // Send scroll
@@ -64,7 +64,7 @@ export function useRemoteInput(isControlling: boolean = false) {
       type: 'scroll',
       payload: { deltaX, deltaY }
     };
-    webrtcService.sendRemoteInput(input);
+    peerService.sendRemoteInput(input);
   }, [isControlling]);
 
   return {
@@ -82,10 +82,11 @@ export function useRemoteInputHandler(onRemoteInput?: (input: RemoteInputEvent) 
     if (!onRemoteInput) return;
 
     // Subscribe to data channel messages
-    webrtcService.onDataChannelMessage(onRemoteInput);
+    peerService.onData(onRemoteInput);
 
     return () => {
-      // Cleanup if needed
+      // Cleanup - reset the callback
+      peerService.onData(() => {});
     };
   }, [onRemoteInput]);
 }
