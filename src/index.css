@@ -503,65 +503,117 @@
 
 /* ============================================
    Toast Notifications (Sonner)
+   Responsive pour iPhone 4 à iPhone 15+
    ============================================ */
 
-/* Base toast styles */
+/* Base toast styles - Desktop */
 [data-sonner-toaster] {
-  --width: min(calc(100vw - 2rem), 400px) !important;
-  z-index: 9999 !important;
+  --width: min(calc(100vw - 2rem), 380px) !important;
+  z-index: 99999 !important;
+  position: fixed !important;
 }
 
 [data-sonner-toast] {
-  --normal-bg: var(--surface) !important;
-  --normal-border: var(--border-default) !important;
-  --normal-text: var(--text-primary) !important;
+  --normal-bg: hsl(var(--background)) !important;
+  --normal-border: hsl(var(--border)) !important;
+  --normal-text: hsl(var(--foreground)) !important;
+  font-family: inherit !important;
   font-size: 0.875rem !important;
-  padding: 0.75rem 1rem !important;
-  border-radius: 0.75rem !important;
-  box-shadow: var(--shadow-lg) !important;
+  padding: 0.875rem 1rem !important;
+  border-radius: 0.875rem !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
   max-width: calc(100vw - 2rem) !important;
   margin: 0 auto !important;
+  backdrop-filter: blur(8px) !important;
+  background: hsl(var(--background) / 0.95) !important;
+  border: 1px solid hsl(var(--border)) !important;
 }
 
-/* Mobile toast positioning */
-@media (max-width: 640px) {
+[data-sonner-toast] [data-content] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+[data-sonner-toast] [data-icon] {
+  flex-shrink: 0 !important;
+}
+
+/* ===== MOBILE: iPhone SE, iPhone 4-8 (320px - 375px) ===== */
+@media (max-width: 375px) {
   [data-sonner-toaster] {
-    top: env(safe-area-inset-top, 0.5rem) !important;
+    --width: calc(100vw - 1rem) !important;
     left: 0.5rem !important;
     right: 0.5rem !important;
-    width: auto !important;
+    top: calc(env(safe-area-inset-top, 0px) + 0.5rem) !important;
+    bottom: auto !important;
     transform: none !important;
   }
   
-  [data-sonner-toaster][data-position^="top"] {
-    top: calc(env(safe-area-inset-top, 0) + 0.5rem) !important;
+  [data-sonner-toaster][data-position="top-center"],
+  [data-sonner-toaster][data-position="top-right"],
+  [data-sonner-toaster][data-position="top-left"] {
+    left: 0.5rem !important;
+    right: 0.5rem !important;
+    transform: none !important;
+  }
+  
+  [data-sonner-toast] {
+    font-size: 0.75rem !important;
+    padding: 0.5rem 0.625rem !important;
+    border-radius: 0.5rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    gap: 0.375rem !important;
+  }
+  
+  [data-sonner-toast] [data-icon] {
+    width: 0.875rem !important;
+    height: 0.875rem !important;
+    margin-right: 0.375rem !important;
+  }
+  
+  [data-sonner-toast] [data-content] {
+    gap: 0.375rem !important;
+  }
+  
+  [data-sonner-toast] [data-title] {
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+  }
+  
+  [data-sonner-toast] [data-close-button] {
+    display: none !important;
+  }
+}
+
+/* ===== MOBILE: iPhone X/11/12/13/14 (376px - 430px) ===== */
+@media (min-width: 376px) and (max-width: 430px) {
+  [data-sonner-toaster] {
+    --width: calc(100vw - 1.5rem) !important;
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    top: calc(env(safe-area-inset-top, 0px) + 0.75rem) !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+  
+  [data-sonner-toaster][data-position="top-center"],
+  [data-sonner-toaster][data-position="top-right"],
+  [data-sonner-toaster][data-position="top-left"] {
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    transform: none !important;
   }
   
   [data-sonner-toast] {
     font-size: 0.8125rem !important;
-    padding: 0.625rem 0.875rem !important;
+    padding: 0.625rem 0.75rem !important;
     border-radius: 0.625rem !important;
     width: 100% !important;
     max-width: 100% !important;
-  }
-  
-  [data-sonner-toast] [data-title] {
-    font-size: 0.8125rem !important;
-    font-weight: 600 !important;
-    line-height: 1.3 !important;
-  }
-  
-  [data-sonner-toast] [data-description] {
-    font-size: 0.75rem !important;
-    line-height: 1.4 !important;
-    margin-top: 0.125rem !important;
-  }
-  
-  [data-sonner-toast] [data-close-button] {
-    top: 0.375rem !important;
-    right: 0.375rem !important;
-    width: 1.25rem !important;
-    height: 1.25rem !important;
   }
   
   [data-sonner-toast] [data-icon] {
@@ -569,73 +621,143 @@
     height: 1rem !important;
     margin-right: 0.5rem !important;
   }
+  
+  [data-sonner-toast] [data-title] {
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    line-height: 1.3 !important;
+  }
+  
+  [data-sonner-toast] [data-close-button] {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+    top: 0.5rem !important;
+    right: 0.5rem !important;
+  }
 }
 
-/* Very small screens (4-5 inch phones) */
-@media (max-width: 375px) {
+/* ===== MOBILE: iPhone 14/15 Pro Max, large phones (431px - 640px) ===== */
+@media (min-width: 431px) and (max-width: 640px) {
   [data-sonner-toaster] {
-    left: 0.375rem !important;
-    right: 0.375rem !important;
+    --width: calc(100vw - 2rem) !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    top: calc(env(safe-area-inset-top, 0px) + 1rem) !important;
+    bottom: auto !important;
+    transform: none !important;
+  }
+  
+  [data-sonner-toaster][data-position="top-center"],
+  [data-sonner-toaster][data-position="top-right"],
+  [data-sonner-toaster][data-position="top-left"] {
+    left: 1rem !important;
+    right: 1rem !important;
+    transform: none !important;
   }
   
   [data-sonner-toast] {
-    font-size: 0.75rem !important;
-    padding: 0.5rem 0.75rem !important;
-    border-radius: 0.5rem !important;
+    font-size: 0.875rem !important;
+    padding: 0.75rem 0.875rem !important;
+    border-radius: 0.75rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  [data-sonner-toast] [data-icon] {
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+    margin-right: 0.5rem !important;
   }
   
   [data-sonner-toast] [data-title] {
-    font-size: 0.75rem !important;
-  }
-  
-  [data-sonner-toast] [data-description] {
-    font-size: 0.6875rem !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
   }
 }
 
-/* Tablet and larger */
-@media (min-width: 641px) {
+/* ===== TABLET: iPad Mini, iPad (641px - 1024px) ===== */
+@media (min-width: 641px) and (max-width: 1024px) {
   [data-sonner-toaster] {
-    --width: 400px !important;
+    --width: 360px !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    left: auto !important;
   }
   
   [data-sonner-toast] {
     font-size: 0.875rem !important;
     padding: 0.875rem 1rem !important;
+    border-radius: 0.75rem !important;
   }
 }
 
-/* Toast animation adjustments for mobile */
+/* ===== DESKTOP: Laptops and larger (1025px+) ===== */
+@media (min-width: 1025px) {
+  [data-sonner-toaster] {
+    --width: 380px !important;
+    top: 1.5rem !important;
+    right: 1.5rem !important;
+    left: auto !important;
+  }
+  
+  [data-sonner-toast] {
+    font-size: 0.875rem !important;
+    padding: 1rem 1.125rem !important;
+    border-radius: 0.875rem !important;
+  }
+}
+
+/* Toast animation - smooth for all devices */
 @media (prefers-reduced-motion: no-preference) {
   [data-sonner-toast][data-mounted="true"] {
-    animation: toast-slide-in 0.3s ease-out !important;
+    animation: toast-enter 0.25s ease-out !important;
   }
   
   [data-sonner-toast][data-removed="true"] {
-    animation: toast-slide-out 0.2s ease-in forwards !important;
+    animation: toast-exit 0.2s ease-in forwards !important;
   }
 }
 
-@keyframes toast-slide-in {
+@keyframes toast-enter {
   from {
     opacity: 0;
-    transform: translateY(-0.5rem);
+    transform: translateY(-8px) scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-@keyframes toast-slide-out {
+@keyframes toast-exit {
   from {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
   to {
     opacity: 0;
-    transform: translateY(-0.5rem);
+    transform: translateY(-8px) scale(0.96);
   }
+}
+
+/* Success toast */
+[data-sonner-toast][data-type="success"] {
+  border-left: 3px solid #22c55e !important;
+}
+
+/* Error toast */
+[data-sonner-toast][data-type="error"] {
+  border-left: 3px solid #ef4444 !important;
+}
+
+/* Info toast */
+[data-sonner-toast][data-type="info"] {
+  border-left: 3px solid #5b64e9 !important;
+}
+
+/* Warning toast */
+[data-sonner-toast][data-type="warning"] {
+  border-left: 3px solid #f59e0b !important;
 }
 
 /* ============================================

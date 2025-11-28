@@ -65,16 +65,16 @@ export function HostPage() {
   const handleStartSharing = async () => {
     try {
       await startScreenShare();
-      toast.success('Partage d\'écran démarré');
+      toast.success('Partage actif');
     } catch (error) {
       console.error('Erreur partage:', error);
-      toast.error('Impossible de démarrer le partage');
+      toast.error('Échec du partage');
     }
   };
 
   const handleStopSharing = () => {
     stopScreenShare();
-    toast.info('Partage arrêté');
+    toast.info('Arrêté');
   };
 
   const handleDisconnect = () => {
@@ -86,7 +86,7 @@ export function HostPage() {
     if (state.sessionCode) {
       await navigator.clipboard.writeText(state.sessionCode);
       setCopied('code');
-      toast.success('Code copié');
+      toast.success('Copié !');
       setTimeout(() => setCopied(null), 2000);
     }
   };
@@ -96,7 +96,7 @@ export function HostPage() {
       const link = `${window.location.origin}/join/${state.sessionCode}`;
       await navigator.clipboard.writeText(link);
       setCopied('link');
-      toast.success('Lien copié');
+      toast.success('Copié !');
       setTimeout(() => setCopied(null), 2000);
     }
   };

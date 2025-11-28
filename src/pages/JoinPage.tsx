@@ -102,7 +102,7 @@ export function JoinPage() {
     
     try {
       await joinSession(codeToUse.toUpperCase());
-      toast.success('Connecté à la session');
+      toast.success('Connecté !');
     } catch (error) {
       console.error('Erreur de connexion:', error);
       setCodeValidationError(error instanceof Error ? error.message : 'Erreur de connexion');
