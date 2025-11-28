@@ -176,7 +176,7 @@ export function PeerSessionProvider({ children }: { children: ReactNode }) {
     });
 
     peerService.onError((error) => {
-      dispatch({ type: 'SET_ERROR', payload: error.message });
+      dispatch({ type: 'SET_ERROR', payload: translateError(error) });
     });
   }, []);
 
@@ -283,7 +283,7 @@ export function PeerSessionProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_STATUS', payload: 'ready' });
       console.log('✅ PeerJS initialisé:', peerId);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erreur d\'initialisation';
+      const message = translateError(error instanceof Error ? error : 'Erreur d\'initialisation');
       dispatch({ type: 'SET_ERROR', payload: message });
       throw error;
     }
@@ -357,7 +357,7 @@ export function PeerSessionProvider({ children }: { children: ReactNode }) {
       return sessionCode;
 
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erreur de création de session';
+      const message = translateError(error instanceof Error ? error : 'Erreur de création de session');
       dispatch({ type: 'SET_ERROR', payload: message });
       throw error;
     }
@@ -450,7 +450,7 @@ export function PeerSessionProvider({ children }: { children: ReactNode }) {
       console.log('✅ Connecté à la session:', sessionCode);
 
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erreur de connexion';
+      const message = translateError(error instanceof Error ? error : 'Erreur de connexion');
       dispatch({ type: 'SET_ERROR', payload: message });
       throw error;
     }
@@ -473,6 +473,61 @@ export function PeerSessionProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Traduire les messages d'erreur en français
+  const translateError = (error: Error | string): string => {
+    const message = typeof error === 'string' ? error : error.message;
+    
+    // Erreurs de partage d'écran
+    if (message.includes('Permission denied') || message.includes('NotAllowedError')) {
+      return 'Partage refusé par l\'utilisateur';
+    }
+    if (message.includes('NotFoundError') || message.includes('No screen')) {
+      return 'Aucun écran disponible';
+    }
+    if (message.includes('NotReadableError')) {
+      return 'Impossible d\'accéder à l\'écran';
+    }
+    if (message.includes('AbortError')) {
+      return 'Partage annulé';
+    }
+    
+    // Erreurs de connexion
+    if (message.includes('Timeout')) {
+      return 'Délai de connexion dépassé';
+    }
+    if (message.includes('Connection failed') || message.includes('connection-failure')) {
+      return 'Échec de la connexion';
+    }
+    if (message.includes('peer-unavailable')) {
+      return 'Hôte non disponible';
+    }
+    if (message.includes('disconnected')) {
+      return 'Connexion perdue';
+    }
+    
+    // Erreurs de session
+    if (message.includes('Session non trouvée') || message.includes('not found')) {
+      return 'Session non trouvée';
+    }
+    if (message.includes('Session expirée') || message.includes('expired')) {
+      return 'Session expirée';
+    }
+    if (message.includes('Invalid session')) {
+      return 'Session invalide';
+    }
+    
+    // Erreurs réseau
+    if (message.includes('network') || message.includes('Network')) {
+      return 'Erreur réseau';
+    }
+    if (message.includes('server-error')) {
+      return 'Erreur serveur';
+    }
+    
+    // Message par défaut ou déjà en français
+    return message;
+  };
+
   // Démarrer le partage d'écran (hôte)
   const startScreenShare = async (): Promise<void> => {
     try {
@@ -489,7 +544,7 @@ export function PeerSessionProvider({ children }: { children: ReactNode }) {
       
       console.log('📹 Partage d\'écran démarré');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erreur de partage d\'écran';
+      const message = translateError(error instanceof Error ? error : String(error));
       dispatch({ type: 'SET_ERROR', payload: message });
       throw error;
     }
