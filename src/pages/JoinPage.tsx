@@ -389,17 +389,19 @@ export function JoinPage() {
             ref={containerRef}
             className={`
               ${isFullscreen
-                ? 'fixed inset-0 z-50 bg-black'
-                : 'container-fluid py-4 sm:py-6 lg:py-8 flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-5rem)]'}
+                ? 'fixed inset-0 z-50 bg-black flex items-center justify-center'
+                : 'w-full min-h-[calc(100vh-3.5rem)] sm:min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8'}
             `}
           >
             {/* Video Container */}
             <div className={`
-              relative bg-black rounded-2xl overflow-hidden shadow-2xl
+              relative bg-black overflow-hidden
               ${isFullscreen
-                ? 'w-full h-full rounded-none'
-                : 'aspect-video w-full max-w-5xl max-h-[70vh] mx-auto'}
-            `}>
+                ? 'w-full h-full'
+                : 'aspect-video w-full max-w-6xl rounded-2xl shadow-2xl'}
+            `}
+            style={!isFullscreen ? { maxHeight: 'calc(100vh - 12rem)' } : undefined}
+            >
               <video
                 ref={videoRef}
                 className="w-full h-full object-contain"
@@ -454,13 +456,10 @@ export function JoinPage() {
             
             {/* Info Card - Hidden in fullscreen */}
             {!isFullscreen && (
-              <Card className="card-flat mt-4 w-full max-w-5xl mx-auto">
-                <CardContent className="p-4 sm:p-5 text-center">
-                  <h3 className="text-sm sm:text-base font-semibold text-foreground mb-1">
-                    Mode Visualisation
-                  </h3>
+              <Card className="card-flat mt-4 w-full max-w-6xl">
+                <CardContent className="p-3 sm:p-4 text-center">
                   <p className="text-xs sm:text-sm text-muted-foreground">
-                    Vous visualisez l'écran de l'hôte en temps réel
+                    Visualisation en temps réel • Session {state.sessionCode}
                   </p>
                 </CardContent>
               </Card>
